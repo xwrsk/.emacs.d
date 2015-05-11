@@ -5,7 +5,7 @@
 	     '("melpa" . "http://melpa.milkbox.net/packages/") t)
 
 (load (expand-file-name "~/quicklisp/slime-helper.el"))
-  ;; Replace "sbcl" with the path to your implementation
+;; Replace "sbcl" with the path to your implementation
 (setf inferior-lisp-program "sbcl")
 
 
@@ -73,7 +73,7 @@
   (add-hook 'asm-mode-hook 'helm-gtags-mode)
 
   (define-key helm-gtags-mode-map (kbd "C-c g a") 'helm-gtags-tags-in-this-function)
-  (define-key helm-gtags-mode-map (kbd "C-j") 'helm-gtags-select)
+  ;; (define-key helm-gtags-mode-map (kbd "C-j") 'helm-gtags-select)
   (define-key helm-gtags-mode-map (kbd "M-.") 'helm-gtags-dwim)
   (define-key helm-gtags-mode-map (kbd "M-,") 'helm-gtags-pop-stack)
   (define-key helm-gtags-mode-map (kbd "C-c <") 'helm-gtags-previous-history)
@@ -89,10 +89,59 @@
   (global-set-key (kbd "C-s-h") 'windmove-left)
   (global-set-key (kbd "C-s-l")  'windmove-right)
 
-  (global-set-key [C-up] 'enlarge-window)
-  (global-set-key [C-down] 'shrink-window)
-  (global-set-key [C-right] 'enlarge-window-horizontally) 
-  (global-set-key [C-left] 'shrink-window-horizontally) )
+  (global-set-key (kbd "s-<up>") 'enlarge-window)
+  (global-set-key (kbd "s-<down>") 'shrink-window)
+  (global-set-key (kbd "s-<right>") 'enlarge-window-horizontally) 
+  (global-set-key (kbd "s-<left>") 'shrink-window-horizontally) )
+
+
+(defun magit-setting ()
+  (setf magit-auto-revert-mode nil))
+
+
+(defun toggle-term-mode ()
+  (interactive)
+  (if (equal major-mode 'term-mode)
+      (text-mode)
+    (progn
+      (term-mode)
+      (term-char-mode))
+    ))
+
+(defun multi-term-setting ()
+  ;; (define-key term-mode-map (kbd "M-DEL") 'term-send-backward-kill-word)
+  (add-hook
+   'term-mode-hook
+   (lambda ()
+     (add-to-list 'term-bind-key-alist '("M-[" . multi-term-prev))
+     (add-to-list 'term-bind-key-alist '("M-]" . multi-term-next))
+     (add-to-list 'term-bind-key-alist '("M-DEL" . term-send-backward-kill-word))
+     (add-to-list 'term-bind-key-alist '("M-d" . term-send-forward-kill-word))
+     (add-to-list 'term-bind-key-alist '("M-`" . toggle-term-mode))))
+  (define-key text-mode-map (kbd "M-`") 'toggle-term-mode)
+  )
+
+(defun c-mode-setting ()
+  (add-hook 'c-mode-hook (lambda ()
+			   (local-set-key (kbd "C-j") 'newline))))
+
+(defun lisp-mode-symbol-prettity ()
+  (defconst prettify-symbols-alist
+    '(("lambda" . ?λ)
+      ;; ("==" . ?≡)
+      ))
+  (add-hook 'lisp-mode-hook		'prettify-symbols-mode)
+  (add-hook 'emacs-lisp-mode-hook       'prettify-symbols-mode)
+  (add-hook 'lisp-mode-hook		'prettify-symbols-mode)
+  (add-hook 'lisp-interaction-mode-hook 'prettify-symbols-mode)
+  (add-hook 'scheme-mode-hook           'prettify-symbols-mode)
+  (add-hook 'racket-mode-hook           'prettify-symbols-mode)
+  )
+(defun inferior-scheme-mode-setting ()
+  (add-hook 'inferior-scheme-mode-hook 'prettify-symbols-mode)
+  (add-hook 'inferior-scheme-mode-hook (lambda ()
+					 (local-set-key (kbd "C-j") 'newline)))
+  )
 
 (defun global-setting ()
   (tool-bar-mode -1)
@@ -101,12 +150,19 @@
   (show-paren-mode 1)
   (setf inhibit-startup-screen t)
   (setf column-number-mode t)
+  (add-hook 'dired-mode-hook 'dired-hide-details-mode)
   (load-theme 'sanityinc-solarized-light t)
   (set-font-depend-on-os 14)
   (turn-on-paredit)
   (turn-on-helm-gtags)
   (turn-on-sr-speedbar)
+  (magit-setting)
+  (multi-term-setting)
+  (c-mode-setting)
+  (lisp-mode-symbol-prettity)
+  (inferior-scheme-mode-setting)
   (set-global-key-binding)
+  (setf scheme-program-name "petite --libdirs /home/xuweirong/project/scheme-implementation/scheme-to-c:/home/xuweirong/project/scheme-implementation/nanopass-framework/")
   (setq backup-directory-alist `(("." .  "~/.emacs.d/emacs-backup"))))
 
 (defun main ()
@@ -117,8 +173,23 @@
      helm
      helm-gtags
      sr-speedbar
+     multiple-cursors
+     magit
+     highlight-symbol
      ))
   (global-setting))
 
 (main)
 
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(highlight-symbol-idle-delay 1.0))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
