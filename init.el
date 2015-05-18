@@ -148,6 +148,7 @@
   (menu-bar-mode -1)
   (scroll-bar-mode -1)
   (show-paren-mode 1)
+  (setq ring-bell-function 'ignore)
   (setf inhibit-startup-screen t)
   (setf column-number-mode t)
   (add-hook 'dired-mode-hook 'dired-hide-details-mode)
